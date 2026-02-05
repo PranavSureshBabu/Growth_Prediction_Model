@@ -24,6 +24,18 @@ def create_model():
     model.classifier[-1] = nn.Linear(in_feats, 2)
     return model
 
+_model = None
+
+def load_model():
+    global _model
+    if _model is None:
+        model = create_model().to(DEVICE)
+        state = torch.load(SAVE_PATH, map_location=DEVICE)
+        model.load_state_dict(state)
+        model.eval()
+        _model = model
+    return _model
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python predict_cnn.py path/to/image.jpg")
@@ -64,3 +76,4 @@ if __name__ == "__main__":
     pred = int(np.argmax(probs))
     label = "grown" if pred == 1 else "trimmed"
     print(f"{img_path} → {label} (P(trimmed)={probs[0]:.2f}, P(grown)={probs[1]:.2f})")
+
